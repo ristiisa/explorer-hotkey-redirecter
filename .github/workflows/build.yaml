@@ -1,0 +1,73 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup Visual Studio environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+        
+    - name: Build blocker.exe
+      run: |
+        cl /EHsc /O2 /W4 /DUNICODE /D_UNICODE blocker.cpp user32.lib /Fe:blocker.exe
+        
+    - name: Test executable
+      run: |
+        if (Test-Path blocker.exe) {
+          Write-Host "Build successful - blocker.exe created"
+          Get-Item blocker.exe | Select-Object Name, Length, LastWriteTime
+        } else {
+          Write-Error "Build failed - blocker.exe not found"
+          exit 1
+        }
+        
+    - name: Create release
+      if: github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: blocker.exe
+        tag_name: auto-${{ github.run_number }}
+        name: Release ${{ github.run_number }}
+        body: |
+          ## Windows Hotkey Blocker
+          
+          Blocks configurable hotkeys for all applications except parsecd.exe.
+          
+          ### Usage
+          1. Download `blocker.exe`
+          2. Run as administrator for system-wide hotkey blocking
+          3. The program will block the configured hotkeys except when Parsec is in focus
+          
+          ### Currently blocked hotkeys:
+          - Win+C, Win+V, Win+F, Win+Z, Win+Y, Win+S
+          
+          ### Build info
+          - Built on: ${{ github.run_id }}
+          - Commit: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: blocker-exe
+        path: blocker.exe
