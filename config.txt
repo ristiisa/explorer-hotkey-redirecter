@@ -1,0 +1,28 @@
+# Configuration file for blocker.exe
+# Format: Modifier+Key (one per line)
+# Modifiers: Win, Ctrl, Alt, Shift (can combine)
+# Examples: Win+C, Ctrl+Alt+T, Shift+F1, Ctrl+Shift+Alt+Z
+# Keys: A-Z, 0-9, F1-F24
+
+# Which executables are allowed to receive the blocked hotkeys (separated by ;)
+target=parsecd.exe
+
+# Default Windows hotkeys to block
+Win+C
+Win+V
+Win+F
+Win+Z
+Win+Y
+Win+S
+Win+W
+Win+T
+
+
+# Additional examples (uncomment to use):
+# Win+L
+# Ctrl+Shift+Esc
+# Alt+F4
+# Win+R
+# Ctrl+Alt+Del
+# Shift+Win+S
+# Ctrl+Shift+Alt+F12
